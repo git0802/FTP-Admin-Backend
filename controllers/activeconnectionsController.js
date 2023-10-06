@@ -1,28 +1,24 @@
-const apiResponse = require("../helpers/apiResponse");
-
+const { response } = require("../app");
 const sequelize = require("../config/sequelize");
+const { getWhereClause, filterRangeSetHeader } = require("../helpers/filter");
 
 module.exports = {
   total(req, res) {
     try {
+      const where = getWhereClause(req.query);
       sequelize
         .query(`exec PSFTPConnectionActiveList @AdminID = 3`)
-        .then((result) => {
-          console.log(result[0]);
-          apiResponse.successResponse(res, "ActiveConnections total", {
-            activeConnections: result[0],
-          });
+        .then(async (result) => {
+          filterRangeSetHeader(res, result[0].length, where.start, where.end);
+
+          return res.send(result[0].map((r, index) => {return { id: index, ...r }}));
         })
         .catch((err) => {
-          console.error("Error executing procedure: ", err);
-          apiResponse.ErrorResponse(
-            res,
-            "Error executing procedure: " + err.message
-          );
+          res.json(err);
         });
     } catch (err) {
       //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
+      res.json(err);
     }
   },
   search(req, res) {
@@ -39,12 +35,10 @@ module.exports = {
           },
         });
 
-      apiResponse.successResponse(res, "ActiveConnections search results", {
-        searchResults: searchResults,
-      });
+      res.json({searchResults: searchResults});
     } catch (err) {
       //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
+      res.json(err);
     }
   },
   total24(req, res) {
@@ -61,13 +55,10 @@ module.exports = {
             },
           },
         });
-
-      apiResponse.successResponse(res, "Activeconnections total", {
-        totalConnections: totalConnections,
-      });
+      res.json({totalConnections: totalConnections});
     } catch (err) {
       //throw error in json response with status 500.
-      return apiResponse.ErrorResponse(res, err);
+      res.json(err);
     }
   },
 };
