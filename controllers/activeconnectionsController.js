@@ -1,14 +1,15 @@
 const { response } = require("../app");
 const sequelize = require("../config/sequelize");
 const { getWhereClause, filterRangeSetHeader } = require("../helpers/filter");
+const JsonFind = require("json-find");
 
 module.exports = {
-  total(req, res) {
+  getConnectionList(req, res) {
     try {
       const where = getWhereClause(req.query);
       sequelize
         .query(`exec PSFTPConnectionActiveList @AdminID = 3`)
-        .then(async (result) => {
+        .then((result) => {
           filterRangeSetHeader(res, result[0].length, where.start, where.end);
 
           return res.send(result[0].map((r, index) => {return { id: index, ...r }}));
@@ -19,6 +20,28 @@ module.exports = {
     } catch (err) {
       //throw error in json response with status 500.
       res.json(err);
+    }
+  },
+  getConnectionInfo(req, res) {
+    try {
+      sequelize
+        .query(`exec PSFTPConnectionActiveList @AdminID = 3`)
+        .then((result) => {
+          const data = result[0].map((r, index) => {return { id: index, ...r }});
+          const item = data.find(item => item.id === parseInt(req.params.id));
+          if (item) {
+            return res.send(item);
+          } else {
+            return res.status(404).json({ message: `Item with id ${req.params.id} not found` });
+          }
+        })
+        .catch((e) => {
+          return res.status(500).json({ message: e.message });
+        });
+    } catch (error) {
+      console.log(error);
+  
+      return apiResponse.ErrorResponse(res, "Server Error");
     }
   },
   search(req, res) {

@@ -3,6 +3,7 @@ const ActiveconnectionsController = require("../controllers/activeconnectionsCon
 
 const router = express.Router();
 
-router.get("/total", ActiveconnectionsController.total);
+router.get("/", ActiveconnectionsController.getConnectionList);
+router.get("/:id", ActiveconnectionsController.getConnectionInfo);
 
 module.exports = router;
