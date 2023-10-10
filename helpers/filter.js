@@ -4,7 +4,6 @@ exports.filterRangeSetHeader = (res, total, start, end) => {
     if (end > total) {
         end = total;
     }
-    console.log(total, start, end);
     res.setHeader("Content-Range", `items ${start}-${end}/${total}`);
 };
 

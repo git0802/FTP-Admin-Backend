@@ -8,11 +8,11 @@ module.exports = {
     try {
       const where = getWhereClause(req.query);
       sequelize
-        .query(`exec PSFTPConnectionActiveList @AdminID = 3`)
+        .query(`exec PSFTPConnectionActiveList @AdminID = 1057`)
         .then((result) => {
           filterRangeSetHeader(res, result[0].length, where.start, where.end);
 
-          return res.send(result[0].map((r, index) => {return { id: index, ...r }}));
+          return res.send({"activeconnections": result[0].map((r, index) => {return { id: index, ...r }})});
         })
         .catch((err) => {
           res.json(err);
